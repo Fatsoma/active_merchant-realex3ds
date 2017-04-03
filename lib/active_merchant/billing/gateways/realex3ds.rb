@@ -15,7 +15,7 @@ module ActiveMerchant
     #
     # Realex requires that you specify the account to which your transactions are made.
     #
-    #   gateway = ActiveMerchant::Billing::Realex3dsGateway.new(login: 'xxx', password: 'xxx', acction: 'xxx')
+    #   gateway = ActiveMerchant::Billing::Realex3dsGateway.new(login: 'xxx', password: 'xxx', account: 'xxx')
     #
     # If you wish to accept multiple currencies, you need to create an account per currency.
     # This you would need to handle within your application logic.
