@@ -34,7 +34,7 @@ class RealexTest < Minitest::Test
     )
 
     @gateway_with_account = Realex3dsGateway.new(
-      login: @merchant_id,
+      login: @login,
       password: @secret,
       account: 'bill_web_cengal'
     )
