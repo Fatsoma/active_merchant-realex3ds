@@ -452,6 +452,10 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
+    assert_not_nil response
+    assert_success response
+    assert_equal 'Successful', response.message
+
     options[:order_id] = generate_unique_id
     store_card_response = @gateway.store(@visa, options)
 
@@ -471,9 +475,17 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
+    assert_not_nil response
+    assert_success response
+    assert_equal 'Successful', response.message
+
     options[:order_id] = generate_unique_id
     options[:payment_method] = 'visa01'
     store_card_response = @gateway.store(@visa, options)
+
+    assert_not_nil store_card_response
+    assert_success store_card_response
+    assert_equal 'Successful', store_card_response.message
 
     options[:order_id] = generate_unique_id
     options[:payment_method] = 'visa01'
@@ -495,9 +507,17 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
+    assert_not_nil response
+    assert_success response
+    assert_equal 'Successful', response.message
+
     options[:order_id] = generate_unique_id
     options[:payment_method] = generate_unique_id
     store_card_response = @gateway.store(@visa, options)
+
+    assert_not_nil store_card_response
+    assert_success store_card_response
+    assert_equal 'Successful', store_card_response.message
 
     unstore_card_response = @gateway.unstore(@visa, options)
 
