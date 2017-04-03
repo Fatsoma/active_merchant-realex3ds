@@ -30,4 +30,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('equivalent-xml')
   s.add_development_dependency('minitest')
   s.add_development_dependency('money')
+  s.add_development_dependency('guard')
+  s.add_development_dependency('guard-minitest')
 end
