@@ -3,12 +3,19 @@ require File.expand_path('../../../test_helper', __FILE__)
 require 'digest/sha1'
 require 'active_merchant/billing/gateways/realex3ds'
 
-class RealexTest < Test::Unit::TestCase
+class RealexTest < Minitest::Test
   class ActiveMerchant::Billing::Realex3dsGateway
-    # For the purposes of testing, lets redefine some protected methods as public.
-    public :build_purchase_or_authorization_request, :build_credit_request, :build_void_request,
-           :build_capture_request, :stringify_values, :avs_input_code, :build_cancel_card_request,
-           :build_new_card_request, :build_new_payee_request, :build_receipt_in_request,
+    # For the purposes of testing, redefine some protected methods as public.
+    public :build_purchase_or_authorization_request,
+           :build_credit_request,
+           :build_void_request,
+           :build_capture_request,
+           :stringify_values,
+           :avs_input_code,
+           :build_cancel_card_request,
+           :build_new_card_request,
+           :build_new_payee_request,
+           :build_receipt_in_request,
            :build_3d_secure_verify_signature_or_enrolled_request
   end
 
@@ -53,6 +60,10 @@ class RealexTest < Test::Unit::TestCase
     }
 
     @amount = 100
+  end
+
+  def teardown
+    Mocha::Mockery.teardown
   end
 
   def test_in_test
@@ -228,7 +239,7 @@ SRC
   end
 
   def test_credit_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
       pasref: '1234',
@@ -391,7 +402,7 @@ SRC
   end
 
   def test_verify_signature_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
       order_id: '1',
@@ -428,7 +439,7 @@ SRC
   end
 
   def test_verify_enrolled_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
       order_id: '1',
@@ -463,7 +474,7 @@ SRC
   end
 
   def test_payee_new_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
       order_id: '1',
       user: {
@@ -492,7 +503,7 @@ SRC
   end
 
   def test_new_card_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
       order_id: '1',
       payment_method: 'visa01',
@@ -531,7 +542,7 @@ SRC
   end
 
   def test_receipt_in_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
       order_id: '1',
       payment_method: 'visa01',
@@ -561,7 +572,7 @@ SRC
   end
 
   def test_card_unstore_xml
-    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
       order_id: '1',
       payment_method: 'visa01',

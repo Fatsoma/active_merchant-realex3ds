@@ -22,10 +22,12 @@ Gem::Specification.new do |s|
 
   s.license = 'MIT'
 
-  s.add_dependency('activemerchant', '~> 1.34')
+  s.add_dependency('activemerchant', '>= 1.34', '< 1.44.0')
 
   s.add_development_dependency('rake')
   s.add_development_dependency('mocha', '~> 0.13.0')
-  s.add_development_dependency('rails', '>= 2.3.14')
+  s.add_development_dependency('rails', '>= 2.3.14', '< 5.0')
   s.add_development_dependency('equivalent-xml')
+  s.add_development_dependency('minitest')
+  s.add_development_dependency('money')
 end

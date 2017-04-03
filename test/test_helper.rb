@@ -11,10 +11,12 @@ rescue LoadError => e
   puts "Error loading bundler (#{e.message}): \"gem install bundler\" for bundler support."
 end
 
-require 'test/unit'
+require 'minitest'
+require 'minitest/autorun'
+require 'minitest/pride'
 require 'money'
 require 'mocha/version'
-if Mocha::VERSION.split('.')[1].to_i < 12
+if Gem::Requirement.new('< 0.12').satisfied_by?(Gem::Version.new(Mocha::VERSION))
   require 'mocha'
 else
   require 'mocha/setup'
@@ -41,7 +43,7 @@ rescue LoadError
 end
 
 require 'action_controller'
-require 'action_view/template'
+require 'action_view'
 begin
   require 'active_support/core_ext/module/deprecation'
   require 'action_dispatch/testing/test_process'
@@ -67,30 +69,9 @@ end
 
 module ActiveMerchant
   module Assertions
-    AssertionClass = RUBY_VERSION > '1.9' ? MiniTest::Assertion : Test::Unit::AssertionFailedError
-
     def assert_field(field, value)
       clean_backtrace do
         assert_equal value, @helper.fields[field]
-      end
-    end
-
-    # Allows the testing of you to check for negative assertions:
-    #
-    #   # Instead of
-    #   assert !something_that_is_false
-    #
-    #   # Do this
-    #   assert_false something_that_should_be_false
-    #
-    # An optional +msg+ parameter is available to help you debug.
-    def assert_false(boolean, message = nil)
-      message = build_message message, '<?> is not false or nil.', boolean
-
-      clean_backtrace do
-        assert_block message do
-          !boolean
-        end
       end
     end
 
@@ -113,7 +94,7 @@ module ActiveMerchant
     # The negative of +assert_success+
     def assert_failure(response)
       clean_backtrace do
-        assert_false response.success?, "Response expected to fail: #{response.inspect}"
+        refute response.success?, "Response expected to fail: #{response.inspect}"
       end
     end
 
@@ -125,7 +106,7 @@ module ActiveMerchant
 
     def assert_not_valid(validateable)
       clean_backtrace do
-        assert_false validateable.valid?, 'Expected to not be valid'
+        refute validateable.valid?, 'Expected to not be valid'
       end
     end
 
@@ -143,9 +124,9 @@ module ActiveMerchant
 
     def clean_backtrace(&_block)
       yield
-    rescue AssertionClass => e
+    rescue MiniTest::Assertion => e
       path = File.expand_path(__FILE__)
-      raise AssertionClass, e.message, e.backtrace.reject { |line| File.expand_path(line) =~ /#{path}/ }
+      raise MiniTest::Assertion, e.message, e.backtrace.reject { |line| File.expand_path(line) =~ /#{path}/ }
     end
   end
 
@@ -228,7 +209,7 @@ module ActiveMerchant
   end
 end
 
-Test::Unit::TestCase.class_eval do
+Minitest::Test.class_eval do
   include ActiveMerchant::Billing
   include ActiveMerchant::Assertions
   include ActiveMerchant::Utils

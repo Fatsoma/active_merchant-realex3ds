@@ -2,7 +2,7 @@ require File.expand_path('../../../test_helper', __FILE__)
 
 require 'active_merchant/billing/gateways/realex3ds'
 
-class RemoteRealexTest < Test::Unit::TestCase
+class RemoteRealexTest < Minitest::Test
   def valid_card_attributes
     { first_name: 'Steve', last_name: 'Smith', month: '9', year: '2010', type: 'visa', number: '4242424242424242' }
   end
@@ -450,7 +450,7 @@ class RemoteRealexTest < Test::Unit::TestCase
         last_name: 'Smith'
       }
     }
-    _response = @gateway.store_user(options)
+    response = @gateway.store_user(options)
 
     options[:order_id] = generate_unique_id
     store_card_response = @gateway.store(@visa, options)
@@ -469,11 +469,11 @@ class RemoteRealexTest < Test::Unit::TestCase
         last_name: 'Smith'
       }
     }
-    _response = @gateway.store_user(options)
+    response = @gateway.store_user(options)
 
     options[:order_id] = generate_unique_id
     options[:payment_method] = 'visa01'
-    _store_card_response = @gateway.store(@visa, options)
+    store_card_response = @gateway.store(@visa, options)
 
     options[:order_id] = generate_unique_id
     options[:payment_method] = 'visa01'
@@ -493,11 +493,11 @@ class RemoteRealexTest < Test::Unit::TestCase
         last_name: 'Smith'
       }
     }
-    _response = @gateway.store_user(options)
+    response = @gateway.store_user(options)
 
     options[:order_id] = generate_unique_id
     options[:payment_method] = generate_unique_id
-    _store_card_response = @gateway.store(@visa, options)
+    store_card_response = @gateway.store(@visa, options)
 
     unstore_card_response = @gateway.unstore(@visa, options)
 
