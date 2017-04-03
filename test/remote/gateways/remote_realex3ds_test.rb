@@ -45,7 +45,7 @@ class RemoteRealexTest < Minitest::Test
         }
       )
 
-      assert_not_nil response
+      refute_nil response
       assert_success response
       assert response.test?
       refute_empty response.authorization
@@ -65,7 +65,7 @@ class RemoteRealexTest < Minitest::Test
       description: 'Invalid login test'
     )
 
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     assert_equal '504', response.params['result']
@@ -81,7 +81,7 @@ class RemoteRealexTest < Minitest::Test
       description: 'Test Realex purchase with invalid acocunt'
     )
 
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     assert_equal '506', response.params['result']
@@ -96,7 +96,7 @@ class RemoteRealexTest < Minitest::Test
         order_id: generate_unique_id,
         description: 'Test Realex purchase declined'
       )
-      assert_not_nil response
+      refute_nil response
       assert_failure response
 
       assert_equal '101', response.params['result']
@@ -112,7 +112,7 @@ class RemoteRealexTest < Minitest::Test
         order_id: generate_unique_id,
         description: 'Test Realex Referral B'
       )
-      assert_not_nil response
+      refute_nil response
       assert_failure response
       assert response.test?
       assert_equal '102', response.params['result']
@@ -128,7 +128,7 @@ class RemoteRealexTest < Minitest::Test
         order_id: generate_unique_id,
         description: 'Test Realex Rqeferral A'
       )
-      assert_not_nil response
+      refute_nil response
       assert_failure response
       assert_equal '103', response.params['result']
       assert_equal Realex3dsGateway::DECLINED, response.message
@@ -144,7 +144,7 @@ class RemoteRealexTest < Minitest::Test
         description: 'Test Realex coms error'
       )
 
-      assert_not_nil response
+      refute_nil response
       assert_failure response
 
       assert_equal '200', response.params['result']
@@ -166,7 +166,7 @@ class RemoteRealexTest < Minitest::Test
       description: 'Test Realex ccn error'
     )
 
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     # Looking at the API this should actually be "509 - Invalid credit card length" but hey..
@@ -183,7 +183,7 @@ class RemoteRealexTest < Minitest::Test
       order_id: generate_unique_id,
       description: 'Test Realex expiry month error'
     )
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     assert_equal '509', response.params['result']
@@ -199,7 +199,7 @@ class RemoteRealexTest < Minitest::Test
       order_id: generate_unique_id,
       description: 'Test Realex expiry year error'
     )
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     assert_equal '509', response.params['result']
@@ -216,7 +216,7 @@ class RemoteRealexTest < Minitest::Test
       order_id: generate_unique_id,
       description: 'test_chname_error'
     )
-    assert_not_nil response
+    refute_nil response
     assert_failure response
 
     assert_equal '502', response.params['result']
@@ -232,7 +232,7 @@ class RemoteRealexTest < Minitest::Test
       order_id: generate_unique_id,
       description: 'test_cvn'
     )
-    assert_not_nil response
+    refute_nil response
     assert_success response
     refute_empty response.authorization
   end
@@ -245,7 +245,7 @@ class RemoteRealexTest < Minitest::Test
       description: 'test_cust_num',
       customer: 'my customer id'
     )
-    assert_not_nil response
+    refute_nil response
     assert_success response
     refute_empty response.authorization
   end
@@ -262,7 +262,7 @@ class RemoteRealexTest < Minitest::Test
       }
     )
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     assert response.test?
     refute_empty response.authorization
@@ -290,7 +290,7 @@ class RemoteRealexTest < Minitest::Test
       pasref: auth_response.params['pasref']
     )
 
-    assert_not_nil capture_response
+    refute_nil capture_response
     assert_success capture_response
     assert capture_response.test?
     refute_empty capture_response.authorization
@@ -318,7 +318,7 @@ class RemoteRealexTest < Minitest::Test
       pasref: purchase_response.params['pasref']
     )
 
-    assert_not_nil void_response
+    refute_nil void_response
     assert_success void_response
     assert void_response.test?
     refute_empty void_response.authorization
@@ -349,7 +349,7 @@ class RemoteRealexTest < Minitest::Test
       pasref: purchase_response.params['pasref']
     )
 
-    assert_not_nil rebate_response
+    refute_nil rebate_response
     assert_success rebate_response
     assert rebate_response.test?
     refute_empty rebate_response.authorization
@@ -358,7 +358,7 @@ class RemoteRealexTest < Minitest::Test
 
   def test_realex_response_body
     response = @gateway.authorize(@amount, @visa, order_id: generate_unique_id)
-    assert_not_nil response.body
+    refute_nil response.body
   end
 
   def test_realex_authorize_with_3dsecure
@@ -374,7 +374,7 @@ class RemoteRealexTest < Minitest::Test
       three_d_secure: true
     )
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     refute_empty response.params['pareq']
     refute_empty response.params['enrolled']
@@ -415,7 +415,7 @@ class RemoteRealexTest < Minitest::Test
   #      }
   #    )
   #
-  #    assert_not_nil response
+  #    refute_nil response
   #    assert_success response
   #    refute_empty response.params['pareq']
   #    refute_empty response.params['enrolled']
@@ -436,7 +436,7 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     assert_equal 'Successful', response.message
   end
@@ -452,14 +452,14 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     assert_equal 'Successful', response.message
 
     options[:order_id] = generate_unique_id
     store_card_response = @gateway.store(@visa, options)
 
-    assert_not_nil store_card_response
+    refute_nil store_card_response
     assert_success store_card_response
     assert_equal 'Successful', store_card_response.message
   end
@@ -475,7 +475,7 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     assert_equal 'Successful', response.message
 
@@ -483,7 +483,7 @@ class RemoteRealexTest < Minitest::Test
     options[:payment_method] = 'visa01'
     store_card_response = @gateway.store(@visa, options)
 
-    assert_not_nil store_card_response
+    refute_nil store_card_response
     assert_success store_card_response
     assert_equal 'Successful', store_card_response.message
 
@@ -491,7 +491,7 @@ class RemoteRealexTest < Minitest::Test
     options[:payment_method] = 'visa01'
     receipt_in_response = @gateway.recurring(@amount, @visa, options)
 
-    assert_not_nil receipt_in_response
+    refute_nil receipt_in_response
     assert_success receipt_in_response
     assert_equal 'Successful', receipt_in_response.message
   end
@@ -507,7 +507,7 @@ class RemoteRealexTest < Minitest::Test
     }
     response = @gateway.store_user(options)
 
-    assert_not_nil response
+    refute_nil response
     assert_success response
     assert_equal 'Successful', response.message
 
@@ -515,13 +515,13 @@ class RemoteRealexTest < Minitest::Test
     options[:payment_method] = generate_unique_id
     store_card_response = @gateway.store(@visa, options)
 
-    assert_not_nil store_card_response
+    refute_nil store_card_response
     assert_success store_card_response
     assert_equal 'Successful', store_card_response.message
 
     unstore_card_response = @gateway.unstore(@visa, options)
 
-    assert_not_nil unstore_card_response
+    refute_nil unstore_card_response
     assert_success unstore_card_response
     assert_equal 'Successful', unstore_card_response.message
   end

@@ -106,7 +106,7 @@ module ActiveMerchant
       end
     end
 
-    def assert_not_valid(validateable)
+    def refute_valid(validateable)
       clean_backtrace do
         refute validateable.valid?, 'Expected to not be valid'
       end
