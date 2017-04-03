@@ -4,6 +4,7 @@ require 'digest/sha1'
 require 'active_merchant/billing/gateways/realex3ds'
 
 class RealexTest < Minitest::Test
+  # rubocop:disable Style/ClassAndModuleChildren
   class ActiveMerchant::Billing::Realex3dsGateway
     # For the purposes of testing, redefine some protected methods as public.
     public :build_purchase_or_authorization_request,
@@ -18,6 +19,7 @@ class RealexTest < Minitest::Test
            :build_receipt_in_request,
            :build_3d_secure_verify_signature_or_enrolled_request
   end
+  # rubocop:enable Style/ClassAndModuleChildren
 
   def setup
     @login = 'your_merchant_id'

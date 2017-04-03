@@ -31,10 +31,12 @@ require 'active_support/core_ext/integer/time'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/hash/slice'
 
+# rubocop:disable Lint/HandleExceptions
 begin
   require 'active_support/core_ext/time/acts_like'
 rescue LoadError
 end
+# rubocop:enable Lint/HandleExceptions
 
 begin
   gem 'actionpack'
@@ -180,9 +182,11 @@ module ActiveMerchant
       }.update(options)
     end
 
+    # rubocop:disable Style/ClassVars
     def all_fixtures
       @@fixtures ||= load_fixtures
     end
+    # rubocop:enable Style/ClassVars
 
     def fixtures(key)
       data = all_fixtures[key] || raise(StandardError, "No fixture data was found for '#{key}'")
@@ -191,9 +195,9 @@ module ActiveMerchant
     end
 
     def load_fixtures
-      [DEFAULT_CREDENTIALS, LOCAL_CREDENTIALS].inject({}) do |credentials, file_name|
+      [DEFAULT_CREDENTIALS, LOCAL_CREDENTIALS].each_with_object({}) do |file_name, credentials|
         if File.exist?(file_name)
-          yaml_data = YAML.load(File.read(file_name))
+          yaml_data = YAML.safe_load(File.read(file_name))
           credentials.merge!(symbolize_keys(yaml_data))
         end
         credentials

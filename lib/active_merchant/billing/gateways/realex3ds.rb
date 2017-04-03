@@ -112,6 +112,9 @@ module ActiveMerchant
       #
       # * <tt>:order_id</tt> -- The application generated order identifier. (REQUIRED)
       #
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def purchase(money, creditcard, options = {})
         requires!(options, :order_id)
 
@@ -159,6 +162,9 @@ module ActiveMerchant
         request = build_purchase_or_authorization_request(:purchase, money, creditcard, options)
         commit(request)
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       # Captures the funds from an authorized transaction.
       #
@@ -249,6 +255,10 @@ module ActiveMerchant
         commit(request, :recurring)
       end
 
+      def self.timestamp
+        Time.now.strftime('%Y%m%d%H%M%S')
+      end
+
       private
 
       def commit(request, endpoint=:default)
@@ -291,7 +301,7 @@ module ActiveMerchant
         return response unless xml.root
 
         xml.elements.each('//response/*') do |node|
-          if node.elements.size == 0
+          if node.elements.empty?
             response[node.name.downcase.to_sym] = normalize(node.text)
           else
             node.elements.each do |childnode|
@@ -375,6 +385,7 @@ module ActiveMerchant
         end
       end
 
+      # rubocop:disable Metrics/AbcSize
       def build_new_card_request(credit_card, options = {})
         timestamp = self.class.timestamp
         xml = Builder::XmlMarkup.new(indent: 2)
@@ -399,6 +410,7 @@ module ActiveMerchant
         end
         xml.target!
       end
+      # rubocop:enable Metrics/AbcSize
 
       def build_new_payee_request(options)
         timestamp = self.class.timestamp
@@ -457,6 +469,8 @@ module ActiveMerchant
         xml.target!
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def add_address_and_customer_info(xml, options)
         billing_address = options[:billing_address] || options[:address]
         shipping_address = options[:shipping_address]
@@ -484,6 +498,8 @@ module ActiveMerchant
           end
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def avs_input_code_or_zip(address, options)
         options[ :skip_avs_check ] ? address[ :zip ] : avs_input_code(address)
@@ -572,36 +588,33 @@ module ActiveMerchant
         end
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def message_from(response)
-        message = nil
         case response[:result]
         when '00'
-          message = SUCCESS
+          SUCCESS
         when '101'
-          message = response[:message]
+          response[:message]
         when '102', '103'
-          message = DECLINED
+          DECLINED
         when /^2[0-9][0-9]/
-          message = BANK_ERROR
+          BANK_ERROR
         when /^3[0-9][0-9]/
-          message = REALEX_ERROR
+          REALEX_ERROR
         when /^5[0-9][0-9]/
-          message = response[:message]
+          response[:message]
         when '600', '601', "603"
-          message = ERROR
+          ERROR
         when '666'
-          message = CLIENT_DEACTIVATED
+          CLIENT_DEACTIVATED
         else
-          message = DECLINED
+          DECLINED
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def sanitize_order_id(order_id)
         order_id.to_s.gsub(/[^a-zA-Z0-9\-_]/, '')
-      end
-
-      def self.timestamp
-        Time.now.strftime('%Y%m%d%H%M%S')
       end
     end
   end

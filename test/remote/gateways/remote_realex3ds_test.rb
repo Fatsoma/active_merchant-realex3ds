@@ -48,7 +48,7 @@ class RemoteRealexTest < Minitest::Test
       assert_not_nil response
       assert_success response
       assert response.test?
-      assert response.authorization.length > 0
+      refute_empty response.authorization
       assert_equal 'Successful', response.message
     end
   end
@@ -234,7 +234,7 @@ class RemoteRealexTest < Minitest::Test
     )
     assert_not_nil response
     assert_success response
-    assert response.authorization.length > 0
+    refute_empty response.authorization
   end
 
   def test_customer_number
@@ -247,7 +247,7 @@ class RemoteRealexTest < Minitest::Test
     )
     assert_not_nil response
     assert_success response
-    assert response.authorization.length > 0
+    refute_empty response.authorization
   end
 
   def test_realex_authorize
@@ -265,7 +265,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil response
     assert_success response
     assert response.test?
-    assert response.authorization.length > 0
+    refute_empty response.authorization
     assert_equal 'Successful', response.message
   end
 
@@ -293,7 +293,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil capture_response
     assert_success capture_response
     assert capture_response.test?
-    assert capture_response.authorization.length > 0
+    refute_empty capture_response.authorization
     assert_equal 'Successful', capture_response.message
     assert_match(/Settled Successfully/, capture_response.params['message'])
   end
@@ -321,7 +321,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil void_response
     assert_success void_response
     assert void_response.test?
-    assert void_response.authorization.length > 0
+    refute_empty void_response.authorization
     assert_equal 'Successful', void_response.message
     assert_match(/Voided Successfully/, void_response.params['message'])
   end
@@ -352,7 +352,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil rebate_response
     assert_success rebate_response
     assert rebate_response.test?
-    assert rebate_response.authorization.length > 0
+    refute_empty rebate_response.authorization
     assert_equal 'Successful', rebate_response.message
   end
 
@@ -376,8 +376,8 @@ class RemoteRealexTest < Minitest::Test
 
     assert_not_nil response
     assert_success response
-    assert response.params['pareq'].length > 0
-    assert response.params['enrolled'].length > 0
+    refute_empty response.params['pareq']
+    refute_empty response.params['enrolled']
     assert response.params['enrolled'] == 'Y'
 
     assert_equal response.params['url'], 'https://dropit.3dsecure.net:9443/PIT/ACS'
@@ -417,8 +417,8 @@ class RemoteRealexTest < Minitest::Test
   #
   #    assert_not_nil response
   #    assert_success response
-  #    assert response.params['pareq'].length > 0
-  #    assert response.params['enrolled'].length > 0
+  #    refute_empty response.params['pareq']
+  #    refute_empty response.params['enrolled']
   #
   #    assert_equal 'Successful', response.message
   #  end
