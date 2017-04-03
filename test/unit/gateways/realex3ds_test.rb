@@ -4,13 +4,12 @@ require 'digest/sha1'
 require 'active_merchant/billing/gateways/realex3ds'
 
 class RealexTest < Test::Unit::TestCase
-
   class ActiveMerchant::Billing::Realex3dsGateway
     # For the purposes of testing, lets redefine some protected methods as public.
     public :build_purchase_or_authorization_request, :build_credit_request, :build_void_request,
-      :build_capture_request, :stringify_values, :avs_input_code, :build_cancel_card_request,
-      :build_new_card_request, :build_new_payee_request, :build_receipt_in_request,
-      :build_3d_secure_verify_signature_or_enrolled_request
+           :build_capture_request, :stringify_values, :avs_input_code, :build_cancel_card_request,
+           :build_new_card_request, :build_new_payee_request, :build_receipt_in_request,
+           :build_3d_secure_verify_signature_or_enrolled_request
   end
 
   def setup
@@ -20,37 +19,37 @@ class RealexTest < Test::Unit::TestCase
     @rebate_secret = 'your_rebate_secret'
 
     @gateway = Realex3dsGateway.new(
-      :login => @login,
-      :password => @password,
-      :account => @account
+      login: @login,
+      password: @password,
+      account: @account
     )
 
     @gateway_with_account = Realex3dsGateway.new(
-      :login => @merchant_id,
-      :password => @secret,
-      :account => 'bill_web_cengal'
+      login: @merchant_id,
+      password: @secret,
+      account: 'bill_web_cengal'
     )
 
     @credit_card = CreditCard.new(
-      :number => '4263971921001307',
-      :month => 8,
-      :year => 2008,
-      :first_name => 'Longbob',
-      :last_name => 'Longsen',
-      :type => 'visa'
+      number: '4263971921001307',
+      month: 8,
+      year: 2008,
+      first_name: 'Longbob',
+      last_name: 'Longsen',
+      type: 'visa'
     )
 
     @options = {
-      :order_id => '1'
+      order_id: '1'
     }
 
     @address = {
-      :name => 'Longbob Longsen',
-      :address1 => '123 Fake Street',
-      :city => 'Belfast',
-      :state => 'Antrim',
-      :country => 'Northern Ireland',
-      :zip => 'BT2 8XX'
+      name: 'Longbob Longsen',
+      address1: '123 Fake Street',
+      city: 'Belfast',
+      state: 'Antrim',
+      country: 'Northern Ireland',
+      zip: 'BT2 8XX'
     }
 
     @amount = 100
@@ -79,27 +78,27 @@ class RealexTest < Test::Unit::TestCase
   end
 
   def test_successful_credit
-    @gateway = Realex3dsGateway.new(:login => @login, :password => @password, :rebate_secret => 'xyz')
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, rebate_secret: 'xyz')
     @gateway.expects(:ssl_post).returns(successful_credit_response)
 
-    response = @gateway.credit(@amount, '1234', {:order_id => '1234', :pasref => '1234', :authcode => '1234' })
+    response = @gateway.credit(@amount, '1234', order_id: '1234', pasref: '1234', authcode: '1234')
     assert_instance_of Response, response
     assert_success response
     assert response.test?
   end
 
   def test_unsuccessful_credit
-    @gateway = Realex3dsGateway.new(:login => @login, :password => @password, :rebate_secret => 'xyz')
+    @gateway = Realex3dsGateway.new(login: @login, password: @password, rebate_secret: 'xyz')
     @gateway.expects(:ssl_post).returns(unsuccessful_credit_response)
 
-    response = @gateway.credit(@amount, '1234', {:order_id => '1234', :pasref => '1234', :authcode => '1234' })
+    response = @gateway.credit(@amount, '1234', order_id: '1234', pasref: '1234', authcode: '1234')
     assert_instance_of Response, response
     assert_failure response
     assert response.test?
   end
 
   def test_supported_countries
-    assert_equal ['IE', 'GB'], Realex3dsGateway.supported_countries
+    assert_equal %w(IE GB), Realex3dsGateway.supported_countries
   end
 
   def test_supported_card_types
@@ -122,8 +121,8 @@ class RealexTest < Test::Unit::TestCase
 
   def test_capture_xml
     options = {
-      :pasref => '1234',
-      :order_id => '1'
+      pasref: '1234',
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -144,7 +143,7 @@ SRC
 
   def test_purchase_xml
     options = {
-      :order_id => '1'
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -176,8 +175,8 @@ SRC
 
   def test_void_xml
     options = {
-      :pasref => '1234',
-      :order_id => '1'
+      pasref: '1234',
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -198,7 +197,7 @@ SRC
 
   def test_auth_xml
     options = {
-      :order_id => '1'
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -229,12 +228,11 @@ SRC
   end
 
   def test_credit_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
-
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
-      :pasref => '1234',
-      :order_id => '1'
+      pasref: '1234',
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -253,16 +251,14 @@ SRC
 SRC
 
     assert_equal_xml valid_credit_request_xml, @gateway.build_credit_request(@amount, '1234', options)
-
   end
 
   def test_credit_with_rebate_secret_xml
-
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account, :rebate_secret => @rebate_secret)
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account, rebate_secret: @rebate_secret)
 
     options = {
-      :pasref => '1234',
-      :order_id => '1'
+      pasref: '1234',
+      order_id: '1'
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -282,32 +278,31 @@ SRC
 SRC
 
     assert_equal_xml valid_credit_request_xml, gateway.build_credit_request(@amount, '1234', options)
-
   end
 
   def test_stringify_values
-    assert_equal "timestamp.merchantid.orderid.ammount.currency.creditcard",
-      @gateway.stringify_values(["timestamp","merchantid", "orderid", "ammount", "currency", "creditcard"])
+    assert_equal 'timestamp.merchantid.orderid.ammount.currency.creditcard',
+                 @gateway.stringify_values(%w(timestamp merchantid orderid ammount currency creditcard))
 
-    assert_equal "timestamp.merchantid.orderid.ammount.currency",
-      @gateway.stringify_values(["timestamp","merchantid", "orderid", "ammount", "currency"])
+    assert_equal 'timestamp.merchantid.orderid.ammount.currency',
+                 @gateway.stringify_values(%w(timestamp merchantid orderid ammount currency))
 
-    assert_equal "timestamp.merchantid.orderid",
-      @gateway.stringify_values(["timestamp","merchantid", "orderid"])
+    assert_equal 'timestamp.merchantid.orderid',
+                 @gateway.stringify_values(%w(timestamp merchantid orderid))
   end
 
   def test_should_extract_avs_input
-    address = {:address1 => "123 Fake Street", :zip => 'BT1 0HX'}
-    assert_equal "10|123", @gateway.avs_input_code(address)
+    address = { address1: '123 Fake Street', zip: 'BT1 0HX' }
+    assert_equal '10|123', @gateway.avs_input_code(address)
   end
 
   def test_auth_with_address
     @gateway.expects(:ssl_post).returns(successful_purchase_response)
 
     options = {
-      :order_id => '1',
-      :billing_address => @address,
-      :shipping_address => @address
+      order_id: '1',
+      billing_address: @address,
+      shipping_address: @address
     }
 
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
@@ -316,12 +311,11 @@ SRC
     assert_instance_of Response, response
     assert_success response
     assert response.test?
-
   end
 
   def test_address_with_avs_code
     options = {
-      :billing_address => @address
+      billing_address: @address
     }
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
     request = @gateway.build_purchase_or_authorization_request(:purchase, @amount, @credit_card, options)
@@ -359,8 +353,8 @@ SRC
 
   def test_skip_avs_check
     options = {
-      :billing_address => @address,
-      :skip_avs_check => true
+      billing_address: @address,
+      skip_avs_check: true
     }
     ActiveMerchant::Billing::Realex3dsGateway.expects(:timestamp).returns('20090824160201')
     request = @gateway.build_purchase_or_authorization_request(:purchase, @amount, @credit_card, options)
@@ -397,13 +391,12 @@ SRC
   end
 
   def test_verify_signature_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
-
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
-      :order_id => '1',
-      :three_d_secure_auth => {
-        :pa_res => 'xxxx'
+      order_id: '1',
+      three_d_secure_auth: {
+        pa_res: 'xxxx'
       }
     }
 
@@ -432,16 +425,14 @@ SRC
 SRC
 
     assert_equal_xml valid_verify_signature_request_xml, @gateway.build_3d_secure_verify_signature_or_enrolled_request('3ds-verifysig', @amount, @credit_card, options)
-
   end
 
   def test_verify_enrolled_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
-
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
 
     options = {
-      :order_id => '1',
-      :three_d_secure_auth => {
+      order_id: '1',
+      three_d_secure_auth: {
       }
     }
 
@@ -469,19 +460,16 @@ SRC
 SRC
 
     assert_equal_xml valid_verify_signature_request_xml, @gateway.build_3d_secure_verify_signature_or_enrolled_request('3ds-verifyenrolled', @amount, @credit_card, options)
-
   end
 
-
-
   def test_payee_new_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
-      :order_id => '1',
-      :user => {
-        :id => 1,
-        :first_name => 'John',
-        :last_name => 'Smith'
+      order_id: '1',
+      user: {
+        id: 1,
+        first_name: 'John',
+        last_name: 'Smith'
       }
     }
 
@@ -501,18 +489,17 @@ SRC
 SRC
 
     assert_equal_xml valid_new_payee_request_xml, @gateway.build_new_payee_request(options)
-
   end
 
   def test_new_card_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
-      :order_id => '1',
-      :payment_method => 'visa01',
-      :user => {
-        :id => 1,
-        :first_name => 'John',
-        :last_name => 'Smith'
+      order_id: '1',
+      payment_method: 'visa01',
+      user: {
+        id: 1,
+        first_name: 'John',
+        last_name: 'Smith'
       }
     }
 
@@ -541,18 +528,17 @@ SRC
 SRC
 
     assert_equal_xml valid_new_card_request_xml, @gateway.build_new_card_request(@credit_card, options)
-
   end
 
   def test_receipt_in_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
-      :order_id => '1',
-      :payment_method => 'visa01',
-      :user => {
-        :id => 1,
-        :first_name => 'John',
-        :last_name => 'Smith'
+      order_id: '1',
+      payment_method: 'visa01',
+      user: {
+        id: 1,
+        first_name: 'John',
+        last_name: 'Smith'
       }
     }
 
@@ -572,18 +558,17 @@ SRC
 SRC
 
     assert_equal_xml valid_receipt_in_request_xml, @gateway.build_receipt_in_request(@amount, @credit_card, options)
-
   end
 
   def test_card_unstore_xml
-    gateway = Realex3dsGateway.new(:login => @login, :password => @password, :account => @account)
+    gateway = Realex3dsGateway.new(login: @login, password: @password, account: @account)
     options = {
-      :order_id => '1',
-      :payment_method => 'visa01',
-      :user => {
-        :id => 1,
-        :first_name => 'John',
-        :last_name => 'Smith'
+      order_id: '1',
+      payment_method: 'visa01',
+      user: {
+        id: 1,
+        first_name: 'John',
+        last_name: 'Smith'
       }
     }
 
@@ -603,9 +588,7 @@ SRC
 SRC
 
     assert_equal_xml valid_cancel_card_request_xml, @gateway.build_cancel_card_request(@credit_card, options)
-
   end
-
 
   private
 
@@ -826,14 +809,13 @@ REQUEST
 RESPONSE
   end
 
-
-# TODO
-# Ensure this response error is caught and payments made unobtrusively...
-#
-# <response timestamp="20060322231944">
-# <result> 508</ result>
-# < message> Transaction MPI data does not match the data in the MPI database</ message>
-# </response>
+  # TODO
+  # Ensure this response error is caught and payments made unobtrusively...
+  #
+  # <response timestamp="20060322231944">
+  # <result> 508</ result>
+  # < message> Transaction MPI data does not match the data in the MPI database</ message>
+  # </response>
 
   def successful_authorisation_request_with_3dsecure
     <<-REQUEST
@@ -971,5 +953,4 @@ REQUEST
     </response>
     RESPONSE
   end
-
 end

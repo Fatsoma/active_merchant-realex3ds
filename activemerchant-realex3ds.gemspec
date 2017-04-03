@@ -1,6 +1,7 @@
-$:.push File.expand_path("../lib", __FILE__)
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 require 'rubygems'
+require 'English'
 
 Gem::Specification.new do |s|
   s.platform     = Gem::Platform::RUBY
@@ -14,10 +15,10 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/plexus/active_merchant-realex3ds'
   s.rubyforge_project = 'activemerchant-realex3ds'
 
-  s.require_paths    = %w[lib]
-  s.files            = `git ls-files`.split($/)
-  s.test_files       = `git ls-files -- spec`.split($/)
-  s.extra_rdoc_files = %w[README.md]
+  s.require_paths    = %w(lib)
+  s.files            = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
+  s.test_files       = `git ls-files -- spec`.split($INPUT_RECORD_SEPARATOR)
+  s.extra_rdoc_files = %w(README.md)
 
   s.license = 'MIT'
 
