@@ -1,6 +1,7 @@
-$:.push File.expand_path("../lib", __FILE__)
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 require 'rubygems'
+require 'English'
 
 Gem::Specification.new do |s|
   s.platform     = Gem::Platform::RUBY
@@ -14,17 +15,19 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/plexus/active_merchant-realex3ds'
   s.rubyforge_project = 'activemerchant-realex3ds'
 
+  s.required_ruby_version = '>= 2.3'
+
   s.require_paths    = %w[lib]
-  s.files            = `git ls-files`.split($/)
-  s.test_files       = `git ls-files -- spec`.split($/)
+  s.files            = `git ls-files`.split($RS)
+  s.test_files       = `git ls-files -- spec`.split($RS)
   s.extra_rdoc_files = %w[README.md]
 
   s.license = 'MIT'
 
-  s.add_dependency('activemerchant', '~> 1.34')
+  s.add_dependency('activemerchant', '~> 1.86')
 
   s.add_development_dependency('rake')
-  s.add_development_dependency('mocha', '~> 0.13.0')
-  s.add_development_dependency('rails', '>= 2.3.14')
+  s.add_development_dependency('mocha', '~> 1')
+  s.add_development_dependency('rails', '~> 4.2')
   s.add_development_dependency('equivalent-xml')
 end
