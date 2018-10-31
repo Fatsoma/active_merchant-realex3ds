@@ -135,7 +135,7 @@ class RealexTest < Minitest::Test
   end
 
   def test_supported_card_types
-    assert_equal %i[visa master american_express diners_club switch solo laser], Realex3dsGateway.supported_cardtypes
+    assert_equal %i[visa master american_express diners_club laser], Realex3dsGateway.supported_cardtypes
   end
 
   def test_avs_result_not_supported
@@ -192,7 +192,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -246,7 +245,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -373,7 +371,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -413,7 +410,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -454,7 +450,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -488,7 +483,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
@@ -554,7 +548,6 @@ class RealexTest < Minitest::Test
           <expdate>0808</expdate>
           <chname>Longbob Longsen</chname>
           <type>VISA</type>
-          <issueno/>
           <cvn>
             <number/>
             <presind/>
