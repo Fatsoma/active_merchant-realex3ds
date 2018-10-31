@@ -1,4 +1,4 @@
-$:.unshift File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
 
 begin
   require 'bundler'
@@ -15,13 +15,11 @@ require 'rubygems/package_task'
 # require 'support/ssl_verify'
 # require 'support/outbound_hosts'
 
-desc "Run the unit test suite"
-task :default => 'test:units'
-
-task :test => 'test:units'
+desc 'Run the unit test suite'
+task default: 'test:units'
+task test: 'test:units'
 
 namespace :test do
-
   Rake::TestTask.new(:units) do |t|
     t.pattern = 'test/unit/**/*_test.rb'
     t.ruby_opts << '-rubygems'
@@ -35,24 +33,25 @@ namespace :test do
     t.libs << 'test'
     t.verbose = true
   end
-
 end
 
-desc "Delete tar.gz / zip"
-task :cleanup => [ :clobber_package ]
+desc 'Delete tar.gz / zip'
+task cleanup: %i[clobber_package]
 
-spec = eval(File.read('activemerchant-realex3ds.gemspec'))
+# TODO: refactor to allow for build task but without using eval
+#
+# spec = eval(File.read('activemerchant-realex3ds.gemspec'))
 
-Gem::PackageTask.new(spec) do |p|
-  p.gem_spec = spec
-end
+# Gem::PackageTask.new(spec) do |p|
+#   p.gem_spec = spec
+# end
 
-desc "Release the gems and docs to RubyForge"
-task :release => [ 'gemcutter:publish' ]
+# desc 'Release the gems and docs to RubyForge'
+# task release: %w[gemcutter:publish]
 
-namespace :gemcutter do
-  desc "Publish to gemcutter"
-  task :publish => :package do
-    sh "gem push pkg/activemerchant-realex3ds-#{spec.version}.gem"
-  end
-end
+# namespace :gemcutter do
+#   desc 'Publish to gemcutter'
+#   task publish: :package do
+#     sh "gem push pkg/activemerchant-realex3ds-#{spec.version}.gem"
+#   end
+# end
