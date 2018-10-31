@@ -72,25 +72,6 @@ module ActiveMerchant
       end
     end
 
-    # Allows the testing of you to check for negative assertions:
-    #
-    #   # Instead of
-    #   assert !something_that_is_false
-    #
-    #   # Do this
-    #   assert_false something_that_should_be_false
-    #
-    # An optional +msg+ parameter is available to help you debug.
-    def assert_false(boolean, message = nil)
-      message = build_message message, '<?> is not false or nil.', boolean
-
-      clean_backtrace do
-        assert_block message do
-          !boolean
-        end
-      end
-    end
-
     # A handy little assertion to check for a successful response:
     #
     #   # Instead of
@@ -110,7 +91,7 @@ module ActiveMerchant
     # The negative of +assert_success+
     def assert_failure(response)
       clean_backtrace do
-        assert_false response.success?, "Response expected to fail: #{response.inspect}"
+        assert !response.success?, "Response expected to fail: #{response.inspect}"
       end
     end
 
@@ -122,7 +103,7 @@ module ActiveMerchant
 
     def assert_not_valid(validateable)
       clean_backtrace do
-        assert_false validateable.valid?, 'Expected to not be valid'
+        assert !validateable.valid?, 'Expected to not be valid'
       end
     end
 
