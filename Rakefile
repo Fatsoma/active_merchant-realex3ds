@@ -38,20 +38,20 @@ end
 desc 'Delete tar.gz / zip'
 task cleanup: %i[clobber_package]
 
-# TODO: refactor to allow for build task but without using eval
-#
-# spec = eval(File.read('activemerchant-realex3ds.gemspec'))
+spec = Gem::Specification.load(
+  File.join(__dir__, 'activemerchant-realex3ds.gemspec')
+)
 
-# Gem::PackageTask.new(spec) do |p|
-#   p.gem_spec = spec
-# end
+Gem::PackageTask.new(spec) do |p|
+  p.gem_spec = spec
+end
 
-# desc 'Release the gems and docs to RubyForge'
-# task release: %w[gemcutter:publish]
+desc 'Release the gems and docs to RubyForge'
+task release: %w[gemcutter:publish]
 
-# namespace :gemcutter do
-#   desc 'Publish to gemcutter'
-#   task publish: :package do
-#     sh "gem push pkg/activemerchant-realex3ds-#{spec.version}.gem"
-#   end
-# end
+namespace :gemcutter do
+  desc 'Publish to gemcutter'
+  task publish: :package do
+    sh "gem push pkg/activemerchant-realex3ds-#{spec.version}.gem"
+  end
+end
