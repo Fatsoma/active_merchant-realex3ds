@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency('activemerchant', '~> 1.86')
 
   s.add_development_dependency('rake')
+  s.add_development_dependency('test-unit', '~> 3')
   s.add_development_dependency('mocha', '~> 1')
   s.add_development_dependency('rails', '~> 4.2')
   s.add_development_dependency('equivalent-xml')

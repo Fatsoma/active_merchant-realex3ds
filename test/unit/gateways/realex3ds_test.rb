@@ -22,7 +22,7 @@ module ActiveMerchant
   end
 end
 
-class RealexTest < Minitest::Test
+class RealexTest < Test::Unit::TestCase
   def setup
     @login = 'your_merchant_id'
     @password = 'your_secret'
@@ -91,11 +91,6 @@ class RealexTest < Minitest::Test
   end
 
   def test_successful_credit
-    @gateway = Realex3dsGateway.new(
-      login: @login,
-      password: @password,
-      rebate_secret: 'xyz'
-    )
     @gateway.expects(:ssl_post).returns(successful_credit_response)
 
     response = @gateway.credit(
@@ -111,11 +106,6 @@ class RealexTest < Minitest::Test
   end
 
   def test_unsuccessful_credit
-    @gateway = Realex3dsGateway.new(
-      login: @login,
-      password: @password,
-      rebate_secret: 'xyz'
-    )
     @gateway.expects(:ssl_post).returns(unsuccessful_credit_response)
 
     response = @gateway.credit(
@@ -802,16 +792,16 @@ class RealexTest < Minitest::Test
         <orderid>orderid</orderid>
         <amount currency="EUR">2499</amount>
         <card>
-        <number>4012001037141112</number>
-        <expdate>0404</expdate>
-        <type>visa</type>
-        <chname>Joe Pescqualli</chname>
+          <number>4012001037141112</number>
+          <expdate>0404</expdate>
+          <type>visa</type>
+          <chname>Joe Pescqualli</chname>
         </card>
         <pares>eJztWFmT4jgS/..... a/A2OMEv4=</pares>
         <sha1hash>e0817f5ffeca1241c23a52b0eafa5c578ef68356</sha1hash>
         <comments>
-        <comment id="1" />
-        <comment id="2" />
+          <comment id="1" />
+          <comment id="2" />
         </comments>
       </request>
     REQUEST
@@ -851,21 +841,21 @@ class RealexTest < Minitest::Test
         <orderid>orderid</orderid>
         <amount currency="EUR">2499</amount>
         <card>
-        <number>4012001037141112</number>
-        <expdate>0404</expdate>
-        <type>visa</type>
-        <chname>Joe Pescqualli</chname>
+          <number>4012001037141112</number>
+          <expdate>0404</expdate>
+          <type>visa</type>
+          <chname>Joe Pescqualli</chname>
         </card>
         <autosettle flag="1" />
         <mpi>
-        <cavv>AAACAWQWaRKIFwQlVBZpAAAAAAA=</cavv>
-        <xid>l2ncCuvKNtCtRY3OoC/ztHS8ZvI=</xid>
-        <eci>5</eci>
+          <cavv>AAACAWQWaRKIFwQlVBZpAAAAAAA=</cavv>
+          <xid>l2ncCuvKNtCtRY3OoC/ztHS8ZvI=</xid>
+          <eci>5</eci>
         </mpi>
         <sha1hash>e0817f5ffeca1241c23a52b0eafa5c578ef68356</sha1hash>
         <comments>
-        <comment id="1" />
-        <comment id="2" />
+          <comment id="1" />
+          <comment id="2" />
         </comments>
         <autosettle flag="1" />
       </request>
@@ -888,7 +878,7 @@ class RealexTest < Minitest::Test
         <md5hash>ff3be479aca946522a9d72d792855018</md5hash>
         <sha1hash>2858c85a5e380e9dc9398329bbd1f086527fc2a7</sha1hash>
       </response>
-  RESPONSE
+    RESPONSE
   end
 
   def successful_payer_edit_response
@@ -907,7 +897,7 @@ class RealexTest < Minitest::Test
         <md5hash>0bcbd8187c2e2ff48668bca26c706a39</md5hash>
         <sha1hash>7cd0d46c65d6985b7871a7e682451be5ac1b5a2d</sha1hash>
       </response>
-  RESPONSE
+    RESPONSE
   end
 
   def successful_card_store_response
@@ -926,7 +916,7 @@ class RealexTest < Minitest::Test
         <md5hash>e41b9e80d0421930131572d66c830407</md5hash>
         <sha1hash>281e5be5a58c7e26b2a6aa31018177960a9c49ab</sha1hash>
       </response>
-  RESPONSE
+    RESPONSE
   end
 
   def unsuccessful_card_store_response
