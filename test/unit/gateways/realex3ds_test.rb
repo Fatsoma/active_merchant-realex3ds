@@ -367,7 +367,7 @@ class RealexTest < Test::Unit::TestCase
       three_d_secure_sig: {
         eci: 5,
         xid: 'crqAeMwkEL9r4POdxpByWJ1/wYg=',
-        cavv: 'AAABASY3QHgwUVdEBTdAAAAAAAA=',
+        cavv: 'AAABASY3QHgwUVdEBTdAAAAAAAA='
       }
     }
 
@@ -1058,7 +1058,7 @@ class RealexTest < Test::Unit::TestCase
   #   REQUEST
   # end
 
-  # def successful_reccurring_response
+  # def successful_recurring_response
   #   <<-RESPONSE.strip_heredoc
   #     <response timestamp="20080611121850">
   #       <merchantid>yourmerchantid</merchantid>
@@ -1077,7 +1077,7 @@ class RealexTest < Test::Unit::TestCase
   #   RESPONSE
   # end
 
-  # def unsucessful_recurring_response
+  # def unsuccessful_recurring_response
   #   <<-RESPONSE.strip_heredoc
   #     <response timestamp="20080611122328">
   #       <merchantid>yourmerchantid</merchantid>
