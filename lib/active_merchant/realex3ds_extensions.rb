@@ -7,8 +7,8 @@ module ActiveMerchant
         @three_d_secure
       end
 
-      def enrolled?
-        @three_d_secure_enrolled
+      def enrolled?(state = 'Y')
+        @three_d_secure_enrolled == state ? true : false
       end
 
       alias initialize_original initialize
