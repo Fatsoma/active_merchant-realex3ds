@@ -11,18 +11,6 @@ rescue LoadError => e
   puts "Error loading bundler (#{e.message}): \"gem install bundler\" for bundler support."
 end
 
-require 'minitest/autorun'
-require 'mocha/minitest'
-
-require 'yaml'
-require 'json'
-require 'money'
-require 'active_utils'
-require 'active_merchant'
-require 'offsite_payments'
-require 'comm_stub'
-require 'assert_equal_xml'
-
 require 'active_support/core_ext/integer/time'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/hash/slice'
@@ -33,6 +21,15 @@ begin
 rescue LoadError
   puts 'Warning: unable to load active_support/core_ext/time/acts_like'
 end
+
+require 'test/unit'
+require 'mocha/test_unit'
+
+require 'yaml'
+require 'json'
+require 'active_merchant'
+require 'comm_stub'
+require 'assert_equal_xml'
 
 begin
   gem 'actionpack'
@@ -66,65 +63,110 @@ end
 
 module ActiveMerchant
   module Assertions
+    ASSERTION_CLASS = defined?(Minitest) ? MiniTest::Assertion : Test::Unit::AssertionFailedError
+
     def assert_field(field, value)
       clean_backtrace do
         assert_equal value, @helper.fields[field]
       end
     end
 
-    # A handy little assertion to check for a successful response:
+    # Allows testing of negative assertions:
     #
     #   # Instead of
-    #   assert_success response
+    #   assert !something_that_is_false
+    #
+    #   # Do this
+    #   assert_false something_that_should_be_false
+    #
+    # An optional +msg+ parameter is available to help you debug.
+    def assert_false(boolean, message = nil)
+      message = build_message message, '<?> is not false or nil.', boolean
+
+      clean_backtrace do
+        assert_block message do
+          !boolean
+        end
+      end
+    end
+
+    # An assertion of a successful response:
+    #
+    #   # Instead of
+    #   assert response.success?
     #
     #   # DRY that up with
     #   assert_success response
     #
     # A message will automatically show the inspection of the response
     # object if things go afoul.
-    def assert_success(response)
+    def assert_success(response, message=nil)
       clean_backtrace do
-        assert response.success?, "Response failed: #{response.inspect}"
+        assert response.success?, build_message(nil, "#{message + "\n" if message}Response expected to succeed: <?>", response)
       end
     end
 
     # The negative of +assert_success+
-    def assert_failure(response)
+    def assert_failure(response, message=nil)
       clean_backtrace do
-        assert !response.success?, "Response expected to fail: #{response.inspect}"
+        assert !response.success?, build_message(nil, "#{message + "\n" if message}Response expected to fail: <?>", response)
       end
     end
 
-    def assert_valid(validateable)
+    def assert_valid(model, message=nil)
+      errors = model.validate
+
       clean_backtrace do
-        assert validateable.valid?, 'Expected to be valid'
+        assert_equal({}, errors, (message || 'Expected to be valid'))
       end
+
+      errors
     end
 
-    def assert_not_valid(validateable)
+    def assert_not_valid(model)
+      errors = model.validate
+
       clean_backtrace do
-        assert !validateable.valid?, 'Expected to not be valid'
+        assert_not_equal({}, errors, 'Expected to not be valid')
       end
+
+      errors
     end
 
-    def assert_deprecation_warning(message, target)
-      target.expects(:deprecated).with(message)
+    def assert_deprecation_warning(message=nil)
+      ActiveMerchant.expects(:deprecated).with(message || anything)
       yield
     end
 
-    def assert_no_deprecation_warning(target)
-      target.expects(:deprecated).never
+    def refute(value, message = nil)
+      assert(!value, message)
+    end
+
+    def silence_deprecation_warnings
+      ActiveMerchant.stubs(:deprecated)
       yield
     end
+
+    def assert_no_deprecation_warning
+      ActiveMerchant.expects(:deprecated).never
+      yield
+    end
+
+    # rubocop:disable Style/CaseEquality
+    def assert_scrubbed(unexpected_value, transcript)
+      regexp = (Regexp === unexpected_value ? unexpected_value : Regexp.new(Regexp.quote(unexpected_value.to_s)))
+      refute_match regexp, transcript, 'Expected the value to be scrubbed out of the transcript'
+    end
+    # rubocop:enable Style/CaseEquality
 
     private
 
     def clean_backtrace(&_block)
       yield
-    rescue MiniTest::Assertion => e
+    rescue ASSERTION_CLASS => e
       path = File.expand_path(__FILE__)
       raise(
-        MiniTest::Assertion,
+        ASSERTION_CLASS,
         e.message,
         e.backtrace.reject { |line| File.expand_path(line) =~ /#{path}/ }
       )
@@ -155,6 +197,13 @@ module ActiveMerchant
           end
           credentials
         end
+      end
+
+      def symbolize_keys(hash)
+        return unless hash.is_a?(Hash)
+
+        hash.symbolize_keys!
+        hash.each { |_, v| symbolize_keys(v) }
       end
     end
 
@@ -203,37 +252,25 @@ module ActiveMerchant
       }.merge(options)
     end
 
-    def all_fixtures
-      self.class.all_fixtures
-    end
-
     def fixtures(key)
-      unless all_fixtures.key?(key)
+      unless Fixtures.all_fixtures.key?(key)
         raise(StandardError, "No fixture data was found for '#{key}'")
       end
 
-      all_fixtures[key].dup
-    end
-
-    def symbolize_keys(hash)
-      return unless hash.is_a?(Hash)
-
-      hash.symbolize_keys!
-      hash.each { |_, v| symbolize_keys(v) }
+      Fixtures.all_fixtures[key].dup
     end
   end
 end
 
-Minitest::Test.class_eval do
+Test::Unit::TestCase.class_eval do
   include ActiveMerchant::Billing
-  include ActiveUtils
   include ActiveMerchant::Assertions
   include ActiveMerchant::Fixtures
 end
 
 module ActionViewHelperTestHelper
   def self.included(base)
-    base.send(:include, OffsitePayments::ActionViewHelper)
+    base.send(:include, ActiveMerchant::Billing::Integrations::ActionViewHelper)
     base.send(:include, ActionView::Helpers::FormHelper)
     base.send(:include, ActionView::Helpers::FormTagHelper)
     base.send(:include, ActionView::Helpers::UrlHelper)

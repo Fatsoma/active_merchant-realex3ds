@@ -1,8 +1,10 @@
 require File.expand_path('../../../test_helper', __FILE__)
 
 require 'active_merchant/billing/gateways/realex3ds'
+require 'active_merchant/realex3ds_extensions'
+require 'securerandom'
 
-class RemoteRealexTest < Minitest::Test
+class RemoteRealexTest < Test::Unit::TestCase
   def valid_card_attributes
     {
       first_name: 'Steve',
@@ -16,6 +18,10 @@ class RemoteRealexTest < Minitest::Test
 
   def create_card(fixture)
     CreditCard.new valid_card_attributes.merge(fixtures(fixture))
+  end
+
+  def generate_unique_id
+    SecureRandom.uuid
   end
 
   def setup
@@ -55,7 +61,7 @@ class RemoteRealexTest < Minitest::Test
       assert_not_nil response
       assert_success response
       assert response.test?
-      assert !response.authorization.empty?
+      assert_false response.authorization.empty?
       assert_equal 'Successful', response.message
     end
   end
@@ -80,10 +86,10 @@ class RemoteRealexTest < Minitest::Test
   end
 
   def test_realex_purchase_with_invalid_account
-    @gateway_with_invalid_account = Realex3dsGateway.new(
+    gateway_with_invalid_account = Realex3dsGateway.new(
       fixtures(:realex_with_account).merge(account: 'thisdoesnotexist')
     )
-    response = @gateway_with_invalid_account.purchase(
+    response = gateway_with_invalid_account.purchase(
       @amount,
       @visa,
       order_id: generate_unique_id,
@@ -246,7 +252,7 @@ class RemoteRealexTest < Minitest::Test
     )
     assert_not_nil response
     assert_success response
-    assert !response.authorization.empty?
+    assert_false response.authorization.empty?
   end
 
   def test_customer_number
@@ -259,7 +265,7 @@ class RemoteRealexTest < Minitest::Test
     )
     assert_not_nil response
     assert_success response
-    assert !response.authorization.empty?
+    assert_false response.authorization.empty?
   end
 
   def test_realex_authorize
@@ -277,7 +283,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil response
     assert_success response
     assert response.test?
-    assert !response.authorization.empty?
+    assert_false response.authorization.empty?
     assert_equal 'Successful', response.message
   end
 
@@ -305,7 +311,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil capture_response
     assert_success capture_response
     assert capture_response.test?
-    assert !capture_response.authorization.empty?
+    assert_false capture_response.authorization.empty?
     assert_equal 'Successful', capture_response.message
     assert_match(/Settled Successfully/, capture_response.params['message'])
   end
@@ -333,7 +339,7 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil void_response
     assert_success void_response
     assert void_response.test?
-    assert !void_response.authorization.empty?
+    assert_false void_response.authorization.empty?
     assert_equal 'Successful', void_response.message
     assert_match(/Voided Successfully/, void_response.params['message'])
   end
@@ -366,13 +372,14 @@ class RemoteRealexTest < Minitest::Test
     assert_not_nil rebate_response
     assert_success rebate_response
     assert rebate_response.test?
-    assert !rebate_response.authorization.empty?
+    assert_false rebate_response.authorization.empty?
     assert_equal 'Successful', rebate_response.message
   end
 
   def test_realex_response_body
     response = @gateway.authorize(@amount, @visa, order_id: generate_unique_id)
-    assert_not_nil response.body
+
+    assert_not_empty response.params
   end
 
   def test_realex_authorize_with_3dsecure
@@ -390,8 +397,8 @@ class RemoteRealexTest < Minitest::Test
 
     assert_not_nil response
     assert_success response
-    assert !response.params['pareq'].empty?
-    assert !response.params['enrolled'].empty?
+    assert_false response.params['pareq'].empty?
+    assert_false response.params['enrolled'].empty?
     assert response.params['enrolled'] == 'Y'
 
     assert_equal response.params['url'], 'https://dropit.3dsecure.net:9443/PIT/ACS'
@@ -427,8 +434,8 @@ class RemoteRealexTest < Minitest::Test
   #
   #   assert_not_nil response
   #   assert_success response
-  #   assert !response.params['pareq'].empty?
-  #   assert !response.params['enrolled'].empty?
+  #   assert_false response.params['pareq'].empty?
+  #   assert_false response.params['enrolled'].empty?
   #
   #   assert_equal 'Successful', response.message
   # end

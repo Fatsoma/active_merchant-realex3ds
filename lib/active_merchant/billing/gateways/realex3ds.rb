@@ -91,13 +91,20 @@ module ActiveMerchant
         requires!(options, :order_id)
 
         if options[:three_d_secure]
-          three_d_secure_request = build_3d_secure_verify_signature_or_enrolled_request('3ds-verifyenrolled', money, creditcard, options)
-          three_d_secure_response = commit(three_d_secure_request, :three_d_secure)
-          return three_d_secure_response if three_d_secure_response.enrolled?
+          process_3d_secure_enrollment_and_action(
+            :authorization,
+            money,
+            creditcard,
+            options
+          )
+        else
+          process_purchase_or_authorization(
+            :authorization,
+            money,
+            creditcard,
+            options
+          )
         end
-
-        request = build_purchase_or_authorization_request(:authorization, money, creditcard, options)
-        commit(request)
       end
 
       # Perform a purchase, which is essentially an authorization and capture in a single operation.
@@ -112,59 +119,31 @@ module ActiveMerchant
       #
       # * <tt>:order_id</tt> -- The application generated order identifier. (REQUIRED)
       #
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
       def purchase(money, creditcard, options = {})
         requires!(options, :order_id)
 
         if options[:three_d_secure_auth]
-          three_d_secure_request = build_3d_secure_verify_signature_or_enrolled_request('3ds-verifysig', money, creditcard, options)
-          three_d_secure_response = commit(three_d_secure_request, :three_d_secure)
-          result = three_d_secure_response.params['result']
-          if result == '00'
-            status = three_d_secure_response.params['threedsecure_status']
-            # success
-            if %w[Y A].include?(status)
-              # Y: 3d Secure complete.
-              # A: ACS service aknowledges.
-              # not-liable. continue
-              options[:three_d_secure_sig] = {}
-              options[:three_d_secure_sig][:eci]  = three_d_secure_response.params['threedsecure_eci']
-              options[:three_d_secure_sig][:xid]  = three_d_secure_response.params['threedsecure_xid']
-              options[:three_d_secure_sig][:cavv] = three_d_secure_response.params['threedsecure_cavv']
-              # TODO: add option[:accept_liability_authentication_failed]
-              # TODO: add option[:accept_liability_acs_failure]
-
-            elsif status == 'N'
-              # password entered incorrectly
-              # liable. abort?
-              return Response.new(false, '3DSecure password entered incorrectly. Aborting transaction.', {}, {})
-            elsif status == 'U'
-              # Bank ACS service having dificulty.
-              # liable. abort?
-              return Response.new(false, '3DSecure Bank ACS service 500 errors. Aborting transaction.', {}, {})
-            end
-          elsif result == '110'
-            # fail, message tampered with.
-            return Response.new(false, '3DSecure message tampered. Aborting transaction.', {}, {})
-          else
-            return Response.new(false, 'Unknown 3DSecure Error.', {}, {})
-          end
+          process_3d_secure_verification_and_purchase(
+            money,
+            creditcard,
+            options
+          )
+        elsif options[:three_d_secure]
+          process_3d_secure_enrollment_and_action(
+            :purchase,
+            money,
+            creditcard,
+            options
+          )
+        else
+          process_purchase_or_authorization(
+            :purchase,
+            money,
+            creditcard,
+            options
+          )
         end
-
-        if options[:three_d_secure] && !options[:three_d_secure_auth]
-          three_d_secure_request = build_3d_secure_verify_signature_or_enrolled_request('3ds-verifyenrolled', money, creditcard, options)
-          three_d_secure_response = commit(three_d_secure_request, :three_d_secure)
-          return three_d_secure_response if three_d_secure_response.enrolled?
-        end
-
-        request = build_purchase_or_authorization_request(:purchase, money, creditcard, options)
-        commit(request)
       end
-      # rubocop:enable Metrics/PerceivedComplexity
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
 
       # Captures the funds from an authorized transaction.
       #
@@ -261,6 +240,104 @@ module ActiveMerchant
 
       private
 
+      def process_purchase_or_authorization(action, money, creditcard, options = {})
+        request = build_purchase_or_authorization_request(
+          action,
+          money,
+          creditcard,
+          options
+        )
+        commit(request)
+      end
+
+      # NOTE: 3D Secure scenarios outlined in https://developer.realexpayments.com/#!/api/3d-secure/secure-scenarios
+      # rubocop:disable Metrics/PerceivedComplexity
+      def process_3d_secure_verification_and_purchase(money, creditcard, options = {})
+        three_d_secure_request = build_3d_secure_verify_signature_or_enrolled_request(
+          '3ds-verifysig',
+          money,
+          creditcard,
+          options
+        )
+        three_d_secure_response = commit(three_d_secure_request, :three_d_secure)
+        result = three_d_secure_response.params['result']
+
+        if result == '00'
+          status = three_d_secure_response.params['threedsecure_status']
+          if %w[Y A].include?(status)
+            # success (scenario 5 & 6)
+            # Y: 3d Secure complete.
+            # A: ACS service aknowledges.
+            # not-liable. continue
+            options[:three_d_secure_sig] = {}
+            options[:three_d_secure_sig][:eci]  = three_d_secure_response.params['threedsecure_eci']
+            options[:three_d_secure_sig][:xid]  = three_d_secure_response.params['threedsecure_xid']
+            options[:three_d_secure_sig][:cavv] = three_d_secure_response.params['threedsecure_cavv']
+            # TODO: add option[:accept_liability_authentication_failed]
+            # TODO: add option[:accept_liability_acs_failure]
+
+            process_purchase_or_authorization(
+              :purchase,
+              money,
+              creditcard,
+              options
+            )
+          elsif status == 'N'
+            # password entered incorrectly (scenario 7)
+            # liable so abort
+            return Response.new(false, '3DSecure password entered incorrectly. Aborting transaction.', {}, {})
+          elsif status == 'U'
+            # Bank ACS service having dificulty. (scenario 8)
+            # liable so abort
+            return Response.new(false, '3DSecure Bank ACS service 500 errors. Aborting transaction.', {}, {})
+          end
+        elsif result == '110'
+          # fail, message tampered with. (scenario 4)
+          return Response.new(false, '3DSecure message tampered. Aborting transaction.', {}, {})
+        else
+          # fail, invalid response (scenario 9)
+          return Response.new(false, 'Unknown 3DSecure Error.', {}, {})
+        end
+      end
+      # rubocop:enable Metrics/PerceivedComplexity
+
+      def process_3d_secure_enrollment_and_action(action, money, creditcard, options = {})
+        three_d_secure_request = build_3d_secure_verify_signature_or_enrolled_request(
+          '3ds-verifyenrolled',
+          money,
+          creditcard,
+          options
+        )
+        three_d_secure_response = commit(three_d_secure_request, :three_d_secure)
+
+        card_supports_not_enrolled = %w[visa master].include?(creditcard.brand)
+
+        if three_d_secure_response.enrolled?
+          # cardholder enrolled (scenario 5 - 9)
+          three_d_secure_response
+        elsif three_d_secure_response.enrolled?('N') && card_supports_not_enrolled
+          # cardholder not enrolled and card supports shift in liability (scenario 1)
+          options[:three_d_secure_sig] = {}
+          options[:three_d_secure_sig][:eci] = creditcard.brand == 'visa' ? 6 : 1
+
+          process_purchase_or_authorization(
+            action,
+            money,
+            creditcard,
+            options
+          )
+        else
+          # uncertain about enrollment (scenario 2 & 3)
+          # liable so abort
+          Response.new(
+            false,
+            'Not enrolled in 3DSecure Error.',
+            { 'orderid' => options[:order_id] },
+            {}
+          )
+        end
+      end
+
       def commit(request, endpoint=:default)
         url = URL
         url = THREE_D_SECURE_URL if endpoint == :three_d_secure
@@ -286,7 +363,7 @@ module ActiveMerchant
             acs_url: parsed[:url],
             three_d_secure: true,
             xid: parsed[:xid],
-            three_d_secure_enrolled: parsed[:enrolled] == 'Y' ? true : false
+            three_d_secure_enrolled: parsed[:enrolled]
           )
         end
 
@@ -447,10 +524,13 @@ module ActiveMerchant
 
       def add_three_d_secure(xml, options)
         if options[:three_d_secure_sig]
+          include_cavv = !options[:three_d_secure_sig][:cavv].nil?
+          include_xid = !options[:three_d_secure_sig][:xid].nil?
+
           xml.tag! 'mpi' do
-            xml.tag! 'cavv', options[:three_d_secure_sig][:cavv]
-            xml.tag! 'xid', options[:three_d_secure_sig][:xid]
             xml.tag! 'eci', options[:three_d_secure_sig][:eci]
+            xml.tag! 'cavv', options[:three_d_secure_sig][:cavv] if include_cavv
+            xml.tag! 'xid', options[:three_d_secure_sig][:xid] if include_xid
           end
         end
       end
