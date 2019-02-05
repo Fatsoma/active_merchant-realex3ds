@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     activemerchant-realex3ds (1.0.1)
-      activemerchant (~> 1.86)
+      activemerchant (~> 1.90.0)
 
 GEM
   remote: https://rubygems.org/
@@ -29,8 +29,8 @@ GEM
     activejob (4.2.10)
       activesupport (= 4.2.10)
       globalid (>= 0.3.0)
-    activemerchant (1.86.0)
-      activesupport (>= 4.2, < 6.x)
+    activemerchant (1.90.0)
+      activesupport (>= 4.2)
       builder (>= 2.1.2, < 4.0.0)
       i18n (>= 0.6.9)
       nokogiri (~> 1.4)
@@ -125,4 +125,4 @@ DEPENDENCIES
   test-unit (~> 3)
 
 BUNDLED WITH
-   1.16.3
+   1.17.1
